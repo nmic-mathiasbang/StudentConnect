@@ -4,12 +4,16 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { ScrollFadeIn } from "@/components/ScrollFadeIn";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const { user, isAuthenticated, logout } = useAuth();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("students");
   const [email, setEmail] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -53,12 +57,32 @@ export default function Home() {
             </a>
           </nav>
           <div className="flex items-center space-x-3">
-            <Button variant="ghost" size="sm">
-              Sign In
-            </Button>
-            <Button size="sm">
-              Get Started
-            </Button>
+            {isAuthenticated ? (
+              <>
+                <span className="text-sm text-muted-foreground">
+                  Welcome, {user?.user_type === 'student' ? user.first_name : user?.user_type === 'company' ? user.company_name : 'User'}!
+                </span>
+                <Button variant="ghost" size="sm" onClick={logout}>
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => router.push('/login')}
+                >
+                  Sign In
+                </Button>
+                <Button 
+                  size="sm"
+                  onClick={() => router.push('/signup')}
+                >
+                  Get Started
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -130,7 +154,7 @@ export default function Home() {
             </form>
             {isSubmitted && (
               <p className="text-sm text-muted-foreground mt-2 text-center animate-in fade-in duration-300">
-                Thanks for joining! We'll keep you updated on our launch.
+                Thanks for joining! We&apos;ll keep you updated on our launch.
               </p>
             )}
           </div>
@@ -206,7 +230,11 @@ export default function Home() {
             <ScrollFadeIn delay={400} className="mt-16 text-center">
               <div className="inline-flex items-center gap-2 bg-background/80 backdrop-blur-sm border rounded-lg px-4 py-2">
                 <span className="text-sm text-muted-foreground">Ready to get started?</span>
-                <Button variant="link" className="p-0 h-auto text-sm">
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto text-sm"
+                  onClick={() => router.push('/signup')}
+                >
                   Join the waitlist
                 </Button>
               </div>
@@ -242,7 +270,7 @@ export default function Home() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground">
-                      Get creative solutions from students who bring new ideas, unburdened by "how things have always been done."
+                      Get creative solutions from students who bring new ideas, unburdened by &quot;how things have always been done.&quot;
                     </p>
                   </CardContent>
                 </Card>
@@ -284,7 +312,11 @@ export default function Home() {
             <ScrollFadeIn delay={400} className="mt-16 text-center">
               <div className="inline-flex items-center gap-2 bg-background/80 backdrop-blur-sm border rounded-lg px-4 py-2">
                 <span className="text-sm text-muted-foreground">Ready to partner with us?</span>
-                <Button variant="link" className="p-0 h-auto text-sm">
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto text-sm"
+                  onClick={() => router.push('/signup')}
+                >
                   Get in touch
                 </Button>
               </div>
@@ -387,7 +419,7 @@ export default function Home() {
               </form>
               {isSubmitted && (
                 <p className="text-sm text-muted-foreground mt-3 text-center animate-in fade-in duration-300">
-                  🎉 Thanks for joining! We'll keep you updated on our launch progress.
+                  🎉 Thanks for joining! We&apos;ll keep you updated on our launch progress.
                 </p>
               )}
             </ScrollFadeIn>
@@ -421,6 +453,7 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
     </div>
   );
 }
