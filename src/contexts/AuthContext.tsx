@@ -98,7 +98,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Profile will be fetched automatically via onAuthStateChange
     } catch (error) {
       console.error('Login failed:', error);
-      throw error instanceof AuthError ? error : new Error('Login failed');
+      // Better error handling with more details
+      if (error instanceof AuthError) {
+        throw error;
+      } else if (error && typeof error === 'object' && 'message' in error) {
+        throw new Error(error.message as string);
+      } else {
+        throw new Error('Login failed: Unknown error occurred');
+      }
     }
   };
 
@@ -118,10 +125,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         throw new Error('Failed to create user');
       }
 
-      // Create the profile
+      // Update the profile (it was already created by the trigger)
       const profileData = {
-        user_id: authData.user.id,
-        email: data.email,
         user_type: data.userType,
         is_profile_complete: false,
         ...(data.userType === 'student' ? {
@@ -144,7 +149,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       const { error: profileError } = await supabase
         .from('profiles')
-        .upsert(profileData, { onConflict: 'user_id' });
+        .update(profileData)
+        .eq('user_id', authData.user.id);
 
       if (profileError) {
         // If profile creation fails, clean up the auth user
@@ -155,7 +161,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Profile will be fetched automatically via onAuthStateChange
     } catch (error) {
       console.error('Signup failed:', error);
-      throw error instanceof AuthError ? error : new Error('Signup failed');
+      // Better error handling with more details
+      if (error instanceof AuthError) {
+        throw error;
+      } else if (error && typeof error === 'object' && 'message' in error) {
+        throw new Error(error.message as string);
+      } else {
+        throw new Error('Signup failed: Unknown error occurred');
+      }
     }
   };
 
